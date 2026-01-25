@@ -1,0 +1,187 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: code-review-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: code_review_db
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - code-review-network
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: code-review-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: code_review_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    command: mongod --auth
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - code-review-network
+
+  # Redis Cache & Message Queue
+  redis:
+    image: redis:7-alpine
+    container_name: code-review-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass admin123
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - code-review-network
+
+  # Backend API Service (Express + GraphQL)
+  backend-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: code-review-backend-api
+    restart: unless-stopped
+    environment:
+      # Server
+      NODE_ENV: development
+      PORT: 3001
+      API_VERSION: v1
+
+      # PostgreSQL
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: code_review_db
+
+      # MongoDB
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/code_review_db?authSource=admin
+
+      # JWT
+      JWT_SECRET: your_super_secret_jwt_key_change_in_production
+      JWT_EXPIRES_IN: 7d
+      JWT_REFRESH_SECRET: your_super_secret_refresh_key
+      JWT_REFRESH_EXPIRES_IN: 30d
+
+      # OpenAI
+      OPENAI_API_KEY: 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
+      OPENAI_MODEL: gpt-4
+      OPENAI_MAX_TOKENS: 4000
+
+      # gRPC
+      GRPC_HOST: backend-grpc
+      GRPC_PORT: 50051
+      GRPC_AI_SERVICE_URL: backend-grpc:50051
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: admin123
+
+      # CORS
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./src:/app/src
+      - ./proto:/app/proto
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - code-review-network
+
+  # gRPC AI Analysis Service
+  backend-grpc:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: code-review-backend-grpc
+    restart: unless-stopped
+    environment:
+      # Server
+      NODE_ENV: development
+      GRPC_PORT: 50051
+
+      # OpenAI
+      OPENAI_API_KEY: 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
+      OPENAI_MODEL: gpt-4
+      OPENAI_MAX_TOKENS: 4000
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: admin123
+
+      # MongoDB (for storing analysis results)
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/code_review_db?authSource=admin
+    ports:
+      - "50051:50051"
+    volumes:
+      - ./src:/app/src
+      - ./proto:/app/proto
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: [ "node", "dist/grpc-server.js" ]
+    networks:
+      - code-review-network
+
+volumes:
+  postgres_data:
+    driver: local
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  code-review-network:
+    driver: bridge

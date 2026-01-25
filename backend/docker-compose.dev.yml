@@ -1,0 +1,31 @@
+version: '3.8'
+
+# Development override file
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # Development Backend API - with hot reload
+  backend-api:
+    build:
+      target: base
+    volumes:
+      - ./src:/app/src
+      - ./proto:/app/proto
+      - ./node_modules:/app/node_modules
+      - /app/dist
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+
+  # Development gRPC Service - with hot reload
+  backend-grpc:
+    build:
+      target: base
+    volumes:
+      - ./src:/app/src
+      - ./proto:/app/proto
+      - ./node_modules:/app/node_modules
+      - /app/dist
+    command: npm run dev:grpc
+    environment:
+      NODE_ENV: development
