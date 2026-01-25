@@ -12,4 +12,11 @@ export const AppDataSource = new DataSource({
     migrations: [__dirname + '/../migrations/*.{ts,js}'],
     synchronize: false,
     logging: env.NODE_ENV === 'development',
+    extra: {
+        max: 20,
+        min: 5,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
+        maxUses: 7500,
+    }
 });

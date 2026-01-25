@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import healthRouter from './routes/health.routes';
 
 dotenv.config();
 
@@ -17,8 +18,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check route
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+app.use('/health', healthRouter);
 
 export default app;
