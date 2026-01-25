@@ -16,7 +16,7 @@ export const env = {
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'your_super_secret_refresh_key',
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY || 'your_openai_api_key',
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
     OPENAI_MODEL: process.env.OPENAI_MODEL || 'gpt-4',
     OPENAI_MAX_TOKENS: process.env.OPENAI_MAX_TOKENS || 4000,
     GRPC_HOST: process.env.GRPC_HOST || 'localhost',
