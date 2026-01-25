@@ -8,8 +8,8 @@ export const AppDataSource = new DataSource({
     username: env.POSTGRES_USER,
     password: env.POSTGRES_PASSWORD,
     database: env.POSTGRES_DB,
-    entities: [__dirname + '/../**/*.entity.{ts,js}'],
-    migrations: [__dirname + '/../modules/**/migrations/*.{ts,js}'],
+    entities: [__dirname + '/../models/**/*.entity.{ts,js}'],
+    migrations: [__dirname + '/../migrations/*.{ts,js}'],
     synchronize: false,
     logging: env.NODE_ENV === 'development',
 });
