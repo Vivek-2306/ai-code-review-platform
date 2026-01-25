@@ -96,7 +96,7 @@ services:
       JWT_REFRESH_EXPIRES_IN: 30d
 
       # OpenAI
-      OPENAI_API_KEY: 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
+      OPENAI_API_KEY: "YOUR_OPENAI_API_KEY"
       OPENAI_MODEL: gpt-4
       OPENAI_MAX_TOKENS: 4000
 
@@ -147,7 +147,7 @@ services:
       GRPC_PORT: 50051
 
       # OpenAI
-      OPENAI_API_KEY: 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
+      OPENAI_API_KEY: "YOUR_OPENAI_API_KEY"
       OPENAI_MODEL: gpt-4
       OPENAI_MAX_TOKENS: 4000
 
