@@ -95,11 +95,6 @@ services:
       JWT_REFRESH_SECRET: your_super_secret_refresh_key
       JWT_REFRESH_EXPIRES_IN: 30d
 
-      # OpenAI
-      # OPENAI_API_KEY: "YOUR_OPENAI_API_KEY"
-      # OPENAI_MODEL: gpt-4
-      # OPENAI_MAX_TOKENS: 4000
-
       # gRPC
       GRPC_HOST: backend-grpc
       GRPC_PORT: 50051
@@ -145,11 +140,6 @@ services:
       # Server
       NODE_ENV: development
       GRPC_PORT: 50051
-
-      # OpenAI
-      # OPENAI_API_KEY: "YOUR_OPENAI_API_KEY"
-      # OPENAI_MODEL: gpt-4
-      # OPENAI_MAX_TOKENS: 4000
 
       # Redis
       REDIS_HOST: redis
