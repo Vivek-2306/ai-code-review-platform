@@ -17,4 +17,8 @@ authRouter.get('/oauth/providers', oauthController.getProviders.bind(oauthContro
 authRouter.get('/oauth/:provider/authorize', oauthController.authorize.bind(oauthController));
 authRouter.get('/oauth/:provider/callback', oauthController.callback.bind(oauthController));
 
+authRouter.post('/change-password', authenticateToken, authController.changePassword.bind(authController));
+authRouter.get('/sessions', authenticateToken, authController.getSessions.bind(authController));
+authRouter.delete('/sessions/:sessionId', authenticateToken, authController.revokeSession.bind(authController));
+
 export default authRouter;

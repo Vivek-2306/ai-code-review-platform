@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import healthRouter from './routes/health.routes';
 import authRouter from './routes/auth.routes';
 import projectRouter from './routes/project.routes';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Health check route
 app.use('/health', healthRouter);

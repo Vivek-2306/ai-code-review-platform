@@ -6,6 +6,9 @@ import { EmailUtil } from "@/utils/email.util";
 import { JWTUtil, TokenPair, DecodedTokenPayload } from "@/utils/jwt.util";
 import { tokenBlacklistService } from "./token-blacklist.service";
 import { oauthService } from './oauth.service';
+import { sessionService } from './session.service';
+import { tokenStorageService } from './token-storage.service';
+import { Response, Request } from 'express';
 
 
 export interface RegisterDto {
@@ -68,6 +71,39 @@ class AuthService {
         }
     }
 
+    async registerWithSession(
+        data: RegisterDto,
+        req: Request,
+        res: Response
+    ): Promise<AuthResponse> {
+        // Perform registration
+        const result = await this.register(data);
+
+        // Create session
+        const ipAddress = req.ip || req.socket.remoteAddress;
+        const userAgent = req.headers['user-agent'];
+        const sessionId = await sessionService.createSession(
+            result.user.id,
+            result.user.email,
+            ipAddress,
+            userAgent
+        );
+
+        // Set tokens
+        tokenStorageService.setTokens(res, result.tokens.accessToken, result.tokens.refreshToken);
+
+        // Set session ID
+        res.cookie('session_id', sessionId, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: sessionService.getSessionTimeout(),
+            path: '/',
+        });
+
+        return result;
+    }
+
     async login(data: LoginDto): Promise<AuthResponse> {
 
         const emailValidation = EmailUtil.validateAndNormalize(data.email);
@@ -105,6 +141,39 @@ class AuthService {
         }
     }
 
+    async loginWithSession(
+        data: LoginDto,
+        req: Request,
+        res: Response
+    ): Promise<AuthResponse> {
+        // Perform login
+        const result = await this.login(data);
+
+        // Create session
+        const ipAddress = req.ip || req.socket.remoteAddress;
+        const userAgent = req.headers['user-agent'];
+        const sessionId = await sessionService.createSession(
+            result.user.id,
+            result.user.email,
+            ipAddress,
+            userAgent
+        );
+
+        // Set tokens based on storage strategy
+        tokenStorageService.setTokens(res, result.tokens.accessToken, result.tokens.refreshToken);
+
+        // Set session ID in cookie
+        res.cookie('session_id', sessionId, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: sessionService.getSessionTimeout(),
+            path: '/',
+        });
+
+        return result;
+    }
+
     async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
         const payload = JWTUtil.verifyRefreshToken(refreshToken);
 
@@ -134,6 +203,43 @@ class AuthService {
         })
 
         return { accessToken }
+    }
+
+    async changePassword(
+        userId: string,
+        currentPassword: string,
+        newPassword: string
+    ): Promise<void> {
+        // Get user
+        const user = await AppDataSource.getRepository(User).findOne({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Verify current password
+        const isPasswordValid = await PasswordUtil.compare(currentPassword, user.passwordHash);
+        if (!isPasswordValid) {
+            throw new Error('Current password is incorrect');
+        }
+
+        // Validate new password strength
+        const passwordValidation = PasswordUtil.validatePasswordStrength(newPassword);
+        if (!passwordValidation.valid) {
+            throw new Error(passwordValidation.errors.join(', '));
+        }
+
+        // Hash new password
+        const newPasswordHash = await PasswordUtil.hash(newPassword);
+
+        // Update password
+        user.passwordHash = newPasswordHash;
+        await AppDataSource.getRepository(User).save(user);
+
+        // Invalidate all sessions (logout all devices)
+        await sessionService.invalidateUserSessions(userId);
     }
 
     async logout(accessToken: string, refreshToken: string): Promise<void> {
@@ -224,6 +330,21 @@ class AuthService {
             },
             tokens,
         };
+    }
+
+    async getUserSessions(userId: string) {
+        return sessionService.getUserSessions(userId);
+    }
+
+    async revokeSession(userId: string, sessionId: string): Promise<void> {
+        const sessions = await sessionService.getUserSessions(userId);
+        const session = sessions.find((s) => s.sessionId === sessionId);
+
+        if (!session) {
+            throw new Error('Session not found');
+        }
+
+        await sessionService.removeSession(sessionId);
     }
 
 }

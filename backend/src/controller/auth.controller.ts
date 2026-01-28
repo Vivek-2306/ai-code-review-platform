@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { authService, RegisterDto, LoginDto } from "@/services/auth.service";
 import { AuthRequest } from "@/middleware/auth.middleware";
+import { tokenStorageService } from '../services/token-storage.service';
+import { sessionService } from '../services/session.service';
 
 export class AuthController {
 
@@ -13,7 +15,7 @@ export class AuthController {
                 return;
             }
 
-            const result = await authService.register(data);
+            const result = await authService.registerWithSession(data, req, res);
 
             res.status(201).json({
                 message: 'User registered successfully',
@@ -43,7 +45,7 @@ export class AuthController {
                 return;
             }
 
-            const result = await authService.login(data);
+            const result = await authService.loginWithSession(data, req, res);
 
             res.status(200).json({
                 message: 'Login successful',
@@ -79,6 +81,37 @@ export class AuthController {
                 return;
             }
             res.status(500).json({ error: 'Token refresh failed' });
+        }
+    }
+
+    async changePassword(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            if (!req.user) {
+                res.status(401).json({ error: 'Unauthorized' });
+                return;
+            }
+
+            const { currentPassword, newPassword } = req.body;
+
+            if (!currentPassword || !newPassword) {
+                res.status(400).json({ error: 'Current password and new password are required' });
+                return;
+            }
+
+            await authService.changePassword(req.user.id, currentPassword, newPassword);
+
+            // Clear tokens
+            tokenStorageService.clearTokens(res);
+
+            res.status(200).json({
+                message: 'Password changed successfully. All sessions have been invalidated.',
+            });
+        } catch (error: any) {
+            if (error.message.includes('incorrect') || error.message.includes('Password must')) {
+                res.status(400).json({ error: error.message });
+                return;
+            }
+            res.status(500).json({ error: 'Failed to change password' });
         }
     }
 
@@ -132,6 +165,51 @@ export class AuthController {
             });
         } catch (error: any) {
             res.status(500).json({ error: 'Failed to get user info' });
+        }
+    }
+
+    async getSessions(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            if (!req.user) {
+                res.status(401).json({ error: 'Unauthorized' });
+                return;
+            }
+
+            const sessions = await authService.getUserSessions(req.user.id);
+
+            res.status(200).json({
+                message: 'Sessions retrieved successfully',
+                data: sessions,
+            });
+        } catch (error: any) {
+            res.status(500).json({ error: 'Failed to retrieve sessions' });
+        }
+    }
+
+    async revokeSession(req: AuthRequest, res: Response): Promise<void> {
+        try {
+            if (!req.user) {
+                res.status(401).json({ error: 'Unauthorized' });
+                return;
+            }
+
+            const { sessionId } = req.params;
+            if (Array.isArray(sessionId)) {
+                res.status(400).json({ error: 'Invalid sessionId' });
+                return;
+            }
+
+            await authService.revokeSession(req.user.id, sessionId);
+
+            res.status(200).json({
+                message: 'Session revoked successfully',
+            });
+        } catch (error: any) {
+            if (error.message === 'Session not found') {
+                res.status(404).json({ error: error.message });
+                return;
+            }
+            res.status(500).json({ error: 'Failed to revoke session' });
         }
     }
 }

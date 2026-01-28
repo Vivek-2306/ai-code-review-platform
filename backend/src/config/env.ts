@@ -19,6 +19,12 @@ export const env = {
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'your_super_secret_refresh_key',
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
+    JWT_REFRESH_THRESHOLD: process.env.JWT_REFRESH_THRESHOLD || '1d',
+    SESSION_INACTIVITY_TIMEOUT: process.env.SESSION_INACTIVITY_TIMEOUT || '30m',
+    MAX_SESSION_DURATION: process.env.MAX_SESSION_DURATION || '90d',
+    TOKEN_STORAGE_STATERGY: process.env.TOKEN_STORAGE_STATERGY || 'both',
+    TOKEN_HTTP_ONLY: process.env.TOKEN_HTTP_ONLY || 'true',
+    TOKEN_SAME_SITE: process.env.TOKEN_SAME_SITE || 'lax',
 
     OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
     OPENAI_MODEL: process.env.OPENAI_MODEL || 'gpt-4',
