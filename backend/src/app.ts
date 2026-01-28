@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import healthRouter from './routes/health.routes';
 import authRouter from './routes/auth.routes';
+import projectRouter from './routes/project.routes';
 
 dotenv.config();
 
@@ -22,5 +23,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/health', healthRouter);
 
 app.use('api/v1/auth', authRouter);
+app.use('/api/projects', projectRouter);
 
 export default app;
