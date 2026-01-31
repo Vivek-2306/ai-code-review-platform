@@ -2,8 +2,33 @@
 
 import Link from 'next/link';
 import { StepIndicator } from './StepIndicator';
+import { useRegister, type RegisterRole } from '@/hooks/useRegister';
+import { useToast } from '@/components/providers/ToastProvider';
+
+const SSO_DISABLED_MESSAGE =
+  'This feature is not enabled now. Coming soon.';
 
 export function RegisterForm() {
+  const { showToast } = useToast();
+  const {
+    name,
+    email,
+    password,
+    role,
+    loading,
+    error,
+    setName,
+    setEmail,
+    setPassword,
+    setRole,
+    setError,
+    handleSubmit,
+  } = useRegister('/register/onboarding');
+
+  const handleOAuthClick = () => {
+    showToast(SSO_DISABLED_MESSAGE);
+  };
+
   return (
     <div className="w-full max-w-md space-y-8">
       <StepIndicator
@@ -20,6 +45,7 @@ export function RegisterForm() {
         <div className="grid grid-cols-2 gap-4">
           <button
             type="button"
+            onClick={handleOAuthClick}
             className="flex items-center justify-center gap-2 rounded-lg bg-[#233648] hover:bg-[#2d455c] transition-colors py-2.5 px-4 text-sm font-bold border border-[#324d67]"
           >
             <svg
@@ -34,6 +60,7 @@ export function RegisterForm() {
           </button>
           <button
             type="button"
+            onClick={handleOAuthClick}
             className="flex items-center justify-center gap-2 rounded-lg bg-[#233648] hover:bg-[#2d455c] transition-colors py-2.5 px-4 text-sm font-bold border border-[#324d67]"
           >
             <svg
@@ -61,10 +88,24 @@ export function RegisterForm() {
       </div>
 
       {/* Main form */}
-      <form
-        className="space-y-6"
-        onSubmit={(e) => e.preventDefault()}
-      >
+      <form className="space-y-6" onSubmit={handleSubmit}>
+        {error && (
+          <div
+            className="flex items-center gap-2 rounded-lg bg-error-red/10 border border-error-red/30 px-4 py-3 text-sm text-error-red dark:bg-error-red/10 dark:border-error-red/30"
+            role="alert"
+          >
+            <span className="material-symbols-outlined text-lg">error</span>
+            <span>{error}</span>
+            <button
+              type="button"
+              className="ml-auto p-1 rounded hover:bg-error-red/20 focus:outline-none focus:ring-2 focus:ring-error-red/50"
+              onClick={() => setError(null)}
+              aria-label="Dismiss error"
+            >
+              <span className="material-symbols-outlined text-lg">close</span>
+            </button>
+          </div>
+        )}
         <div className="space-y-4">
           <div>
             <label
@@ -74,10 +115,14 @@ export function RegisterForm() {
               Full Name
             </label>
             <input
-              className="w-full bg-[#111a22] border border-[#233648] rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+              className="w-full bg-[#111a22] border border-[#233648] rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all disabled:opacity-70"
               id="name"
               placeholder="Alex Rivera"
               type="text"
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={loading}
             />
           </div>
           <div>
@@ -88,10 +133,14 @@ export function RegisterForm() {
               Work Email
             </label>
             <input
-              className="w-full bg-[#111a22] border border-[#233648] rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+              className="w-full bg-[#111a22] border border-[#233648] rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all disabled:opacity-70"
               id="reg-email"
               placeholder="alex@company.com"
               type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
           <div>
@@ -102,19 +151,33 @@ export function RegisterForm() {
               >
                 Password
               </label>
-              <span className="text-xs text-primary font-medium">Strong</span>
+              <span className="text-xs text-primary font-medium">
+                {password.length >= 8 ? 'Strong' : password.length > 0 ? 'Weak' : ''}
+              </span>
             </div>
             <input
-              className="w-full bg-[#111a22] border border-[#233648] rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+              className="w-full bg-[#111a22] border border-[#233648] rounded-lg px-4 py-2.5 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all disabled:opacity-70"
               id="reg-password"
               type="password"
               placeholder="••••••••••••"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
             <div className="mt-2 flex gap-1 h-1">
-              <div className="flex-1 bg-primary rounded-full" />
-              <div className="flex-1 bg-primary rounded-full" />
-              <div className="flex-1 bg-primary rounded-full" />
-              <div className="flex-1 bg-slate-700 rounded-full" />
+              <div
+                className={`flex-1 rounded-full ${password.length >= 4 ? 'bg-primary' : 'bg-slate-700'}`}
+              />
+              <div
+                className={`flex-1 rounded-full ${password.length >= 6 ? 'bg-primary' : 'bg-slate-700'}`}
+              />
+              <div
+                className={`flex-1 rounded-full ${password.length >= 8 ? 'bg-primary' : 'bg-slate-700'}`}
+              />
+              <div
+                className={`flex-1 rounded-full ${password.length >= 10 ? 'bg-primary' : 'bg-slate-700'}`}
+              />
             </div>
           </div>
         </div>
@@ -125,67 +188,60 @@ export function RegisterForm() {
             Your Role
           </label>
           <div className="grid grid-cols-3 gap-3">
-            <label className="cursor-pointer group">
-              <input
-                defaultChecked
-                className="sr-only peer"
-                name="role"
-                type="radio"
-                value="dev"
-              />
-              <div className="flex flex-col items-center justify-center p-3 rounded-lg border border-[#233648] bg-[#111a22] peer-checked:border-primary peer-checked:bg-primary/10 transition-all ">
-                <span className="material-symbols-outlined text-slate-400 group-has-[:checked]:text-primary mb-1">
-                  code
-                </span>
-                <span className="text-xs font-bold text-slate-300 group-has-[:checked]:text-primary">
-                  Developer
-                </span>
-              </div>
-            </label>
-            <label className="cursor-pointer group">
-              <input
-                className="sr-only peer"
-                name="role"
-                type="radio"
-                value="lead"
-              />
-              <div className="flex flex-col items-center justify-center p-3 rounded-lg border border-[#233648] bg-[#111a22] peer-checked:border-primary peer-checked:bg-primary/10 transition-all ">
-                <span className="material-symbols-outlined text-slate-400 group-has-[:checked]:text-primary mb-1">
-                  terminal
-                </span>
-                <span className="text-xs font-bold text-slate-300 group-has-[:checked]:text-primary">
-                  Lead
-                </span>
-              </div>
-            </label>
-            <label className="cursor-pointer group">
-              <input
-                className="sr-only peer"
-                name="role"
-                type="radio"
-                value="admin"
-              />
-              <div className="flex flex-col items-center justify-center p-3 rounded-lg border border-[#233648] bg-[#111a22] peer-checked:border-primary peer-checked:bg-primary/10 transition-all ">
-                <span className="material-symbols-outlined text-slate-400 group-has-[:checked]:text-primary mb-1">
-                  shield_person
-                </span>
-                <span className="text-xs font-bold text-slate-300 group-has-[:checked]:text-primary">
-                  Admin
-                </span>
-              </div>
-            </label>
+            {(
+              [
+                { value: 'dev' as RegisterRole, icon: 'code', label: 'Developer' },
+                { value: 'lead' as RegisterRole, icon: 'terminal', label: 'Lead' },
+                { value: 'admin' as RegisterRole, icon: 'shield_person', label: 'Admin' },
+              ] as const
+            ).map(({ value, icon, label }) => (
+              <label key={value} className="cursor-pointer group">
+                <input
+                  className="sr-only peer"
+                  name="role"
+                  type="radio"
+                  value={value}
+                  checked={role === value}
+                  onChange={() => setRole(value)}
+                  disabled={loading}
+                />
+                <div className="flex flex-col items-center justify-center p-3 rounded-lg border border-[#233648] bg-[#111a22] peer-checked:border-primary peer-checked:bg-primary/10 transition-all has-[:checked]:border-primary has-[:checked]:bg-primary/10">
+                  <span className="material-symbols-outlined text-slate-400 group-has-[:checked]:text-primary mb-1">
+                    {icon}
+                  </span>
+                  <span className="text-xs font-bold text-slate-300 group-has-[:checked]:text-primary">
+                    {label}
+                  </span>
+                </div>
+              </label>
+            ))}
           </div>
         </div>
 
         <div className="space-y-4 pt-2">
           <button
-            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+            className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             type="submit"
+            disabled={loading}
           >
-            <span>Create Account</span>
-            <span className="material-symbols-outlined text-sm">
-              arrow_forward
-            </span>
+            {loading ? (
+              <>
+                <span
+                  className="material-symbols-outlined text-sm animate-spin"
+                  aria-hidden
+                >
+                  progress_activity
+                </span>
+                Creating account…
+              </>
+            ) : (
+              <>
+                <span>Create Account</span>
+                <span className="material-symbols-outlined text-sm">
+                  arrow_forward
+                </span>
+              </>
+            )}
           </button>
           <p className="text-center text-sm text-slate-500">
             Already have an account?{' '}

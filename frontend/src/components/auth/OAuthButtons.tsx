@@ -1,8 +1,22 @@
+'use client';
+
+import { useToast } from '@/components/providers/ToastProvider';
+
+const SSO_DISABLED_MESSAGE =
+  'This feature is not enabled now. Coming soon.';
+
 export function OAuthButtons() {
+  const { showToast } = useToast();
+
+  const handleOAuthClick = () => {
+    showToast(SSO_DISABLED_MESSAGE);
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <button
         type="button"
+        onClick={handleOAuthClick}
         className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white dark:bg-[#1c2a38] border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-[#253545] transition-colors"
       >
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -12,6 +26,7 @@ export function OAuthButtons() {
       </button>
       <button
         type="button"
+        onClick={handleOAuthClick}
         className="flex items-center justify-center gap-2 py-2.5 px-4 bg-white dark:bg-[#1c2a38] border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-[#253545] transition-colors"
       >
         <svg className="w-5 h-5" viewBox="0 0 48 48">

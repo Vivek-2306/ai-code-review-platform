@@ -40,3 +40,18 @@ body {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   vertical-align: middle;
 }
+
+/* Custom scrollbar (onboarding / dark panels) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #101922;
+}
+::-webkit-scrollbar-thumb {
+  background: #233648;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #324d67;
+}
