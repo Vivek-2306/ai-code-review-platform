@@ -49,6 +49,19 @@ export class TokenStorageService {
         }
     }
 
+    /**
+     * Set tokens as cookies only (no JSON body). Use before res.redirect() for OAuth callback.
+     */
+    setTokensAsCookies(res: Response, accessToken: string, refreshToken: string): void {
+        this.setCookieToken(res, 'access_token', accessToken, this.config.cookieMaxAge);
+        this.setCookieToken(
+            res,
+            'refresh_token',
+            refreshToken,
+            this.parseExpiration(env.JWT_REFRESH_EXPIRES_IN || '30d')
+        );
+    }
+
     private setCookieToken(
         res: Response,
         name: string,

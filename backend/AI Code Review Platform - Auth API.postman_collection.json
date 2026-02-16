@@ -1,0 +1,959 @@
+{
+  "info": {
+    "_postman_id": "34094c57-ff01-40d3-a76e-52ec8d95ef8e",
+    "name": "AI Code Review Platform - Auth API",
+    "description": "Complete API collection: Auth (login, register, sessions, change password), OAuth (GitHub, GitLab, Bitbucket, Google), Git (connections, repos, files, contents), and Projects (CRUD, members).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "12166889",
+    "_collection_link": "https://go.postman.co/collection/12166889-34094c57-ff01-40d3-a76e-52ec8d95ef8e?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", response.data.tokens.accessToken);",
+                  "    pm.environment.set(\"refresh_token\", response.data.tokens.refreshToken);",
+                  "    pm.environment.set(\"user_id\", response.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user. Password must be at least 8 characters with uppercase, lowercase, number, and special character."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", response.data.tokens.accessToken);",
+                  "    pm.environment.set(\"refresh_token\", response.data.tokens.refreshToken);",
+                  "    pm.environment.set(\"user_id\", response.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login with email and password. Automatically saves tokens to environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", response.data.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Refresh access token using refresh token. Updates access_token in environment."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Get current authenticated user information. Requires access token."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"accessToken\": \"{{access_token}}\",\n    \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Logout and blacklist current tokens. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout All Devices",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout-all"
+              ]
+            },
+            "description": "Logout from all devices. Invalidates all tokens for the user."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"currentPassword\": \"SecurePass123!\",\n    \"newPassword\": \"NewSecurePass456!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "change-password"]
+            },
+            "description": "Change password. Invalidates all sessions. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/sessions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "sessions"]
+            },
+            "description": "Get all sessions for the current user. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Revoke Session",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/sessions/:sessionId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "sessions", ":sessionId"]
+            },
+            "description": "Revoke a specific session. Replace :sessionId with the session ID. Requires authentication."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "OAuth",
+      "item": [
+        {
+          "name": "Get OAuth Providers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/providers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "oauth",
+                "providers"
+              ]
+            },
+            "description": "Get list of available OAuth providers (github, gitlab, bitbucket, google)"
+          },
+          "response": []
+        },
+        {
+          "name": "GitHub - Get Authorization URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"oauth_state\", response.state);",
+                  "    pm.environment.set(\"github_auth_url\", response.authUrl);",
+                  "    console.log('Open this URL in browser:', response.authUrl);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/github/authorize",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "oauth",
+                "github",
+                "authorize"
+              ]
+            },
+            "description": "Get GitHub OAuth authorization URL. Open the returned authUrl in browser to start OAuth flow."
+          },
+          "response": []
+        },
+        {
+          "name": "Google - Get Authorization URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"oauth_state\", response.state);",
+                  "    pm.environment.set(\"google_auth_url\", response.authUrl);",
+                  "    console.log('Open this URL in browser:', response.authUrl);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/google/authorize",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "oauth",
+                "google",
+                "authorize"
+              ]
+            },
+            "description": "Get Google OAuth authorization URL. Open the returned authUrl in browser to start OAuth flow."
+          },
+          "response": []
+        },
+        {
+          "name": "GitHub - OAuth Callback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", response.data.tokens.accessToken);",
+                  "    pm.environment.set(\"refresh_token\", response.data.tokens.refreshToken);",
+                  "    pm.environment.set(\"user_id\", response.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/github/callback?code={{github_code}}&state={{oauth_state}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "oauth",
+                "github",
+                "callback"
+              ],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "{{github_code}}",
+                  "description": "Authorization code from GitHub callback"
+                },
+                {
+                  "key": "state",
+                  "value": "{{oauth_state}}",
+                  "description": "State token for CSRF protection"
+                }
+              ]
+            },
+            "description": "Handle GitHub OAuth callback. Use the code from GitHub redirect URL. Automatically saves tokens."
+          },
+          "response": []
+        },
+        {
+          "name": "Google - OAuth Callback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", response.data.tokens.accessToken);",
+                  "    pm.environment.set(\"refresh_token\", response.data.tokens.refreshToken);",
+                  "    pm.environment.set(\"user_id\", response.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/google/callback?code={{google_code}}&state={{oauth_state}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "oauth",
+                "google",
+                "callback"
+              ],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "{{google_code}}",
+                  "description": "Authorization code from Google callback"
+                },
+                {
+                  "key": "state",
+                  "value": "{{oauth_state}}",
+                  "description": "State token for CSRF protection"
+                }
+              ]
+            },
+            "description": "Handle Google OAuth callback. Use the code from Google redirect URL. Automatically saves tokens."
+          },
+          "response": []
+        },
+        {
+          "name": "GitLab - Get Authorization URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"oauth_state\", response.state);",
+                  "    pm.environment.set(\"gitlab_auth_url\", response.authUrl);",
+                  "    console.log('Open this URL in browser:', response.authUrl);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/gitlab/authorize",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "oauth", "gitlab", "authorize"]
+            },
+            "description": "Get GitLab OAuth authorization URL. Open the returned authUrl in browser to start OAuth flow."
+          },
+          "response": []
+        },
+        {
+          "name": "GitLab - OAuth Callback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", response.data.tokens.accessToken);",
+                  "    pm.environment.set(\"refresh_token\", response.data.tokens.refreshToken);",
+                  "    pm.environment.set(\"user_id\", response.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/gitlab/callback?code={{gitlab_code}}&state={{oauth_state}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "oauth", "gitlab", "callback"],
+              "query": [
+                { "key": "code", "value": "{{gitlab_code}}", "description": "Authorization code from GitLab callback" },
+                { "key": "state", "value": "{{oauth_state}}", "description": "State token for CSRF protection" }
+              ]
+            },
+            "description": "Handle GitLab OAuth callback. Use the code from GitLab redirect URL. Automatically saves tokens."
+          },
+          "response": []
+        },
+        {
+          "name": "Bitbucket - Get Authorization URL",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"oauth_state\", response.state);",
+                  "    pm.environment.set(\"bitbucket_auth_url\", response.authUrl);",
+                  "    console.log('Open this URL in browser:', response.authUrl);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/bitbucket/authorize",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "oauth", "bitbucket", "authorize"]
+            },
+            "description": "Get Bitbucket OAuth authorization URL. Open the returned authUrl in browser to start OAuth flow."
+          },
+          "response": []
+        },
+        {
+          "name": "Bitbucket - OAuth Callback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set(\"access_token\", response.data.tokens.accessToken);",
+                  "    pm.environment.set(\"refresh_token\", response.data.tokens.refreshToken);",
+                  "    pm.environment.set(\"user_id\", response.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/oauth/bitbucket/callback?code={{bitbucket_code}}&state={{oauth_state}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "oauth", "bitbucket", "callback"],
+              "query": [
+                { "key": "code", "value": "{{bitbucket_code}}", "description": "Authorization code from Bitbucket callback" },
+                { "key": "state", "value": "{{oauth_state}}", "description": "State token for CSRF protection" }
+              ]
+            },
+            "description": "Handle Bitbucket OAuth callback. Use the code from Bitbucket redirect URL. Automatically saves tokens."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Git",
+      "item": [
+        {
+          "name": "List Connections",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/git/connections",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "git", "connections"]
+            },
+            "description": "List connected Git providers (github, gitlab, bitbucket) for the current user. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Connect GitHub (Authorize)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/git/connect/github/authorize",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "git", "connect", "github", "authorize"]
+            },
+            "description": "Start connect-for-repos flow for GitHub. Redirects to provider; after callback, token is stored. Use in browser or follow redirect. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Connect GitLab (Authorize)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/git/connect/gitlab/authorize",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "git", "connect", "gitlab", "authorize"]
+            },
+            "description": "Start connect-for-repos flow for GitLab. Redirects to provider. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "Connect Bitbucket (Authorize)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/git/connect/bitbucket/authorize",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "git", "connect", "bitbucket", "authorize"]
+            },
+            "description": "Start connect-for-repos flow for Bitbucket. Redirects to provider. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "List Repos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/git/repos?provider=github",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "git", "repos"],
+              "query": [{ "key": "provider", "value": "github", "description": "Optional: github, gitlab, or bitbucket" }]
+            },
+            "description": "List repositories from connected providers. Optional query: provider. Requires authentication."
+          },
+          "response": []
+        },
+        {
+          "name": "List Files",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/git/repos/:owner/:repo/files?provider=github&path=src",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "git", "repos", ":owner", ":repo", "files"],
+              "query": [
+                { "key": "provider", "value": "github", "description": "Required: github, gitlab, or bitbucket" },
+                { "key": "path", "value": "src", "description": "Optional: directory path" }
+              ]
+            },
+            "description": "List files/directories in a repo. Requires provider and optional path. Replace :owner and :repo."
+          },
+          "response": []
+        },
+        {
+          "name": "Get File Content",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/v1/git/repos/:owner/:repo/contents?provider=github&path=README.md",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "git", "repos", ":owner", ":repo", "contents"],
+              "query": [
+                { "key": "provider", "value": "github", "description": "Required: github, gitlab, or bitbucket" },
+                { "key": "path", "value": "README.md", "description": "Required: file path" }
+              ]
+            },
+            "description": "Get file content for review. Requires provider and path. Replace :owner and :repo."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Get All Projects",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"]
+            },
+            "description": "Get all projects. Requires project read permission."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"My Project\",\n    \"description\": \"Optional description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects"]
+            },
+            "description": "Create a new project. Requires project create permission."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/projects/:projectId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ":projectId"]
+            },
+            "description": "Get project by ID. Requires project read permission."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Name\",\n    \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/:projectId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ":projectId"]
+            },
+            "description": "Update project. Requires project update permission."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/projects/:projectId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ":projectId"]
+            },
+            "description": "Delete project. Requires project owner or admin."
+          },
+          "response": []
+        },
+        {
+          "name": "Add Project Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"userId\": \"user-uuid\",\n    \"role\": \"member\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/:projectId/members",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ":projectId", "members"]
+            },
+            "description": "Add a member to the project. Requires manage_members permission."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Project Members",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/projects/:projectId/members",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ":projectId", "members"]
+            },
+            "description": "Get project members. Requires project read permission."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Project Member",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/projects/:projectId/members/:memberId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ":projectId", "members", ":memberId"]
+            },
+            "description": "Update member role. Requires manage_members permission."
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Project Member",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{access_token}}" }],
+            "url": {
+              "raw": "{{base_url}}/api/projects/:projectId/members/:memberId",
+              "host": ["{{base_url}}"],
+              "path": ["api", "projects", ":projectId", "members", ":memberId"]
+            },
+            "description": "Remove a member from the project. Requires manage_members permission."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001",
+      "type": "string"
+    }
+  ]
+}

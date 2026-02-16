@@ -41,10 +41,19 @@ export const env = {
 
     GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID || '',
     GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET || '',
-    GITHUB_REDIRECT_URI: process.env.GITHUB_REDIRECT_URI || 'http://localhost:3001/api/auth/oauth/github/callback',
+    GITHUB_REDIRECT_URI: process.env.GITHUB_REDIRECT_URI || 'http://localhost:3001/api/v1/auth/oauth/github/callback',
+
+    GITLAB_CLIENT_ID: process.env.GITLAB_CLIENT_ID || '',
+    GITLAB_CLIENT_SECRET: process.env.GITLAB_CLIENT_SECRET || '',
+    GITLAB_REDIRECT_URI: process.env.GITLAB_REDIRECT_URI || 'http://localhost:3001/api/v1/auth/oauth/gitlab/callback',
+
+    BITBUCKET_CLIENT_ID: process.env.BITBUCKET_CLIENT_ID || '',
+    BITBUCKET_CLIENT_SECRET: process.env.BITBUCKET_CLIENT_SECRET || '',
+    BITBUCKET_REDIRECT_URI: process.env.BITBUCKET_REDIRECT_URI || 'http://localhost:3001/api/v1/auth/oauth/bitbucket/callback',
 
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
-    GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3001/api/auth/oauth/google/callback',
+    GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3001/api/v1/auth/oauth/google/callback',
 
+    FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
 };

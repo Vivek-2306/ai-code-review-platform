@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { JWTUtil } from "@/utils/jwt.util";
 import { tokenBlacklistService } from "@/services/token-blacklist.service";
+import { tokenStorageService } from "@/services/token-storage.service";
 import { AppDataSource } from "@/config/datasource";
 import { User } from "@/models/postgres/user.entity";
 
@@ -13,8 +14,7 @@ export interface AuthRequest extends Request {
 
 export async function authenticateToken(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-        const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.split(' ')[1];
+        const token = tokenStorageService.getAccessToken(req);
 
         if (!token) {
             res.status(401).json({ error: 'Access token required' });

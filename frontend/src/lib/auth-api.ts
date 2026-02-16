@@ -93,3 +93,27 @@ export async function logout(accessToken: string, refreshToken: string): Promise
     },
   });
 }
+
+export type OAuthProvider = 'github' | 'gitlab' | 'bitbucket' | 'google';
+
+export interface OAuthAuthorizeResponse {
+  authUrl: string;
+  state: string;
+}
+
+/**
+ * Get OAuth authorization URL for login. Frontend should store state and redirect to authUrl.
+ */
+export async function getOAuthAuthorizeUrl(provider: OAuthProvider): Promise<OAuthAuthorizeResponse> {
+  const url = getApiUrl(`${AUTH_BASE}/oauth/${provider}/authorize`);
+  const response = await fetch(url, {
+    method: 'GET',
+    credentials: 'include',
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message = typeof data?.error === 'string' ? data.error : 'Failed to get OAuth URL';
+    throw new Error(message);
+  }
+  return data as OAuthAuthorizeResponse;
+}

@@ -274,13 +274,13 @@ class AuthService {
         return crypto.randomBytes(32).toString('hex');
     }
 
-    getOAuthUrl(provider: 'github' | 'google', state?: string): string {
+    getOAuthUrl(provider: 'github' | 'gitlab' | 'bitbucket' | 'google', state?: string, purpose: 'login' | 'repo' = 'login'): string {
         const oauthState = state || this.generateOAuthState();
-        return oauthService.getAuthUrl(provider, oauthState);
+        return oauthService.getAuthUrl(provider, oauthState, purpose);
     }
 
     async handleOAuthCallback(
-        provider: 'github' | 'google',
+        provider: 'github' | 'gitlab' | 'bitbucket' | 'google',
         code: string,
         state?: string
     ): Promise<AuthResponse> {

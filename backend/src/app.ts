@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import healthRouter from './routes/health.routes';
 import authRouter from './routes/auth.routes';
 import projectRouter from './routes/project.routes';
+import gitRouter from './routes/git.routes';
 import cookieParser from 'cookie-parser';
 
 dotenv.config();
@@ -24,7 +25,8 @@ app.use(cookieParser());
 // Health check route
 app.use('/health', healthRouter);
 
-app.use('api/v1/auth', authRouter);
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/git', gitRouter);
 app.use('/api/projects', projectRouter);
 
 export default app;

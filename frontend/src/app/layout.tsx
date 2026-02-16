@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { AuthProvider } from '@/components/providers/AuthProvider';
 import { ToastProvider } from '@/components/providers/ToastProvider';
+import { OAuthCallbackHandler } from '@/components/auth/OAuthCallbackHandler';
 import './globals.css';
 
 const inter = Inter({
@@ -42,7 +44,12 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} ${inter.className} min-h-screen`}
       >
         <AuthProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <Suspense fallback={null}>
+              <OAuthCallbackHandler />
+            </Suspense>
+            {children}
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>
